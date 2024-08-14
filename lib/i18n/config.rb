@@ -12,6 +12,7 @@ module I18n
 
     # Sets the current locale pseudo-globally, i.e. in the Thread.current hash.
     def locale=(locale)
+      locale = to_iso639_1(locale) if @@normalize_locale
       I18n.enforce_available_locales!(locale)
       @locale = locale && locale.to_sym
     end
@@ -145,6 +146,29 @@ module I18n
     def enforce_available_locales=(enforce_available_locales)
       @@enforce_available_locales = enforce_available_locales
     end
+
+    # Whether or not to normalize given locales in iso639_1 before use it
+    # Defaults to false.
+    @@normalize_locale = false
+    def normalize_locale
+      @@normalize_locale
+    end
+
+    def normalize_locale=(normalize_locale)
+      @@normalize_locale = normalize_locale
+    end
+
+    # Returns a normalized version for the given locale
+    def to_iso639_1(locale)
+      locale
+        .to_s
+        .split('-')
+        .each_with_index
+        .map { |value, index| index.zero? ? value : value.upcase }
+        .join('-')
+        .to_sym
+    end
+
 
     # Returns the current interpolation patterns. Defaults to
     # I18n::DEFAULT_INTERPOLATION_PATTERNS.
